@@ -10,35 +10,12 @@ import dtiFunctions as dti
 import pandas as pd 
 
 if __name__ == "__main__":
+    # load list of pt IDs, initial UEFM score, and change in UEFM score
+    pt_IDs, FM_pre, FM_delta = dti.data_initialization.load_pt_data()
+    # load  pre-, post-therapy hemispheric ROI data for FA or MD (user choice)
+    pre, post = dti.data_initialization.load_hemispheric_data()
     
-    # initialize variable to decide which data to load 
-    prompt_user = 0 
-    # import pretherapy and change in motor score as dataframes
-    motor_initial = pd.read_excel(
-        r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/FM_initial.xlsx')
-    motor_change = pd.read_excel(
-        r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/FM_change.xlsx')
-    # extract list of patients from either dataframe 
-    pt_IDs = dti.preprocessing.extract_pt_IDs(motor_initial)
-    # convert motor scores to pandas series 
-    FM_pre = dti.preprocessing.extract_motor_scores(motor_initial) 
-    FM_delta = dti.preprocessing.extract_motor_scores(motor_change) 
-    
-    while (prompt_user != 1) and (prompt_user != 2):
-        # ask user if want to study FA or MD for hemispheric ROIs
-        prompt_user = int(input("Investigate FA or MD for hemisphere ROIs? \n" 
-                               "Press 1 for FA or 2 for MD: "))
-    # user selects to investigate FA 
-    if prompt_user == 1:
-        # import pre- and post-therapy FAs for hemisphere ROIs
-        pre = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/pretherapy_hemisphere_fa.xlsx') 
-        post = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/posttherapy_hemisphere_fa.xlsx') 
-    # user selects to investigate MD
-    if prompt_user == 2: 
-        # import pre- and post-therapy MDs for hemisphere ROIs
-        pre = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/pretherapy_hemisphere_md.xlsx')
-        post = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/posttherapy_hemisphere_md.xlsx')
-    
+
     # extract list of ROIs
     ROIs = dti.preprocessing.extract_ROIs(pre)
     # log transform FAs 
