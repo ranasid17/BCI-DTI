@@ -11,6 +11,69 @@ import numpy as np
 from scipy import stats 
 import matplotlib.pyplot as plt 
 
+class data_initialization: 
+    def load_pt_data():
+        # import pretherapy and change in motor score as dataframes
+        motor_initial = pd.read_excel(
+            r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/UEFM/FM_initial.xlsx')
+        motor_change = pd.read_excel(
+            r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/UEFM/FM_change.xlsx')
+        # extract list of patients from either dataframe 
+        list_pt_IDs = preprocessing.extract_pt_IDs(motor_initial)
+        # convert motor scores to pandas series 
+        pre_FM_scores = preprocessing.extract_motor_scores(motor_initial) 
+        change_FM_scores = preprocessing.extract_motor_scores(motor_change) 
+        return list_pt_IDs, pre_FM_scores, change_FM_scores
+    
+    
+    def load_hemispheric_data(): 
+        # initialize variable to decide which data to load 
+        prompt_user = 0 
+        while (prompt_user != 1) and (prompt_user != 2):
+            # ask user if want to study FA or MD for hemispheric ROIs
+            prompt_user = int(input(
+                "Investigate FA or MD for hemisphere ROIs? \n" 
+                "Press 1 for FA or 2 for MD: "))
+        # user selects to investigate FA 
+        if prompt_user == 1:
+            # import pre- and post-therapy FAs for hemisphere ROIs
+            pre_therapy_data = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/hemisphere/pretherapy_hemisphere_fa.xlsx') 
+            post_therapy_data = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/hemisphere/posttherapy_hemisphere_fa.xlsx') 
+        # user selects to investigate MD
+        if prompt_user == 2: 
+            # import pre- and post-therapy MDs for hemisphere ROIs
+            pre_therapy_data = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/hemisphere/pretherapy_hemisphere_md.xlsx')
+            post_therapy_data = pd.read_excel(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/hemisphere/posttherapy_hemisphere_md.xlsx')
+        return pre_therapy_data, post_therapy_data
+    
+    
+    def load_cerebellar_data(): 
+        # initialize variable to decide which data to load 
+        prompt_user = 0
+        while (prompt_user != 1) and (prompt_user != 2):
+            # ask user if want to study FA or MD for hemispheric ROIs
+            prompt_user = int(input(
+                "Investigate FA or MD for hemisphere ROIs? \n" 
+                "Press 1 for FA or 2 for MD: "))
+        # user selects to investigate FA 
+        if prompt_user == 1:
+            # import pre- and post-therapy FAs for cbl ROIs - ROI based
+            pre_therapy_ROI = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/fa_pre_cerebellum_ROI.csv') 
+            post_therapy_ROI = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/fa_post_cerebellum_ROI.csv') 
+            # import pre- and post-therapy FAs for cbl ROIs - tract based
+            pre_therapy_TB = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/fa_pre_cerebellum_TB.csv')
+            post_therapy_TB = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/fa_post_cerebellum_TB.csv')
+        # user selects to investigate MD
+        if prompt_user == 2:
+            # import pre- and post-therapy FAs for cbl ROIs - ROI based
+            pre_therapy_ROI = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/md_pre_cerebellum_ROI.csv') 
+            post_therapy_ROI = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/md_post_cerebellum_ROI.csv') 
+            # import pre- and post-therapy FAs for cbl ROIs - tract based
+            pre_therapy_TB = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/md_pre_cerebellum_TB.csv')
+            post_therapy_TB = pd.read_csv(r'/Users/Sid/Documents/Leuthardt Lab/DTI/data/cerebellum/md_post_cerebellum_TB.csv')
+            
+        return pre_therapy_ROI, post_therapy_ROI, pre_therapy_TB, post_therapy_TB
+    
 
 class preprocessing: 
     def extract_pt_IDs(input_dataframe): 
@@ -165,10 +228,21 @@ class plot_features:
         return 0 
         
     
-    def plot_cerebellar_feasures(cbl_dataframe, list_motor_scores): 
-        # extract ROIs, convert to str array, in Ipsi/Contra/Ipsi/Contra order
-        ROIs = np.asarray(cbl_dataframe['Region'],dtype=str).reshape(14,2)
-        return 0 
+    def plot_cerebellar_features(cbl_df, list_motor_scores): 
+
+        # extract ipsi-, contra-lesional ROIs (and ROIs in middle)
+        ipsilesional = cbl_df[cbl_df['Region'].str.contains('Left')]
+        middle = cbl_df[cbl_df['Region'].str.contains('Left')]
+        contralesional = cbl_df[cbl_df['Region'].str.contains('Right')]
+        # store len of new df 
+        index = pd.Series(range(0,len(ipsilesional)))
+        # reset indices to len df 
+        ipsilesional.index = index
+        middle.index = index
+        contralesional.index = index
+
+        
+        return ipsilesional, middle, contralesional 
 
 
     
