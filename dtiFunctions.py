@@ -112,12 +112,21 @@ class preprocessing:
             to df object. plot_dti_measures class only accepts df objects so 
             is helpful to have objects in correct structure. """ 
         # create df using pt IDs for columns 
+        """ list_of_cols should a pd Series or np array containing the list 
+            of pt IDs """
         df = pd.DataFrame(data=input_array, columns=list_of_cols)
         # insert ROIs 
         df.insert(0, 'Region', list_of_ROIs)
         return df 
     
     
+    def extract_lateralized_regions(cbl_df): 
+        # stratify ipsi-, contra-lesional, and middle regions from input df 
+        ipsilesional = cbl_df[cbl_df['Region'].str.contains('Left')]
+        middle = cbl_df[cbl_df['Region'].str.contains('Vermis')]
+        contralesional = cbl_df[cbl_df['Region'].str.contains('Right')]
+        return ipsilesional, middle, contralesional 
+        
 class feature_analysis: 
     def calculate_feature_change(pre_df, post_df, list_IDs): 
         """ First two input args MUST be pandas dataframes
@@ -228,21 +237,49 @@ class plot_features:
         return 0 
         
     
-    def plot_cerebellar_features(cbl_df, list_motor_scores): 
-
-        # extract ipsi-, contra-lesional ROIs (and ROIs in middle)
+    def plot_cerebellum_features(cbl_df, list_motor_scores):
+        # stratify ipsi-, contra-lesional, and middle regions from input df 
         ipsilesional = cbl_df[cbl_df['Region'].str.contains('Left')]
-        middle = cbl_df[cbl_df['Region'].str.contains('Left')]
+        middle = cbl_df[cbl_df['Region'].str.contains('Vermis')]
         contralesional = cbl_df[cbl_df['Region'].str.contains('Right')]
-        # store len of new df 
-        index = pd.Series(range(0,len(ipsilesional)))
-        # reset indices to len df 
-        ipsilesional.index = index
-        middle.index = index
-        contralesional.index = index
-
         
-        return ipsilesional, middle, contralesional 
+        # create sequential series for reindexing extracted data frames
+        index_one = pd.Series(range(0,len(ipsilesional)))
+        index_two = pd.Series(range(0, len(middle)))
+        
+        # apply reindexing 
+        ipsilesional.index = index_one
+        middle.index = index_two
+        contralesional.index = index_one
+        
+        # extract ROIs from stratified data frames and store in pd Series 
+        ipsi_ROIs = pd.Series(ipsilesional['Region'],dtype=str)
+        middle_ROIs = np.asarray(middle['Region'],dtype=str)
+        contra_ROIs = np.asarray(contralesional['Region'],dtype=str)
+        
+        
+        # create figure and (10x2) axes object, with shared x and y tick marks
+        fig, axes = plt.subplots(len(index_one), 2, sharex=True, sharey=True)
+        
+        # set axes titles, plot ipsi- and contra-lesional features for ROIs
+        for i in range(int(len(index_one))):
+            # set axis titles 
+            axes[i][0].set_title(ipsi_ROIs[i]) # LHS: all ipsi- regions 
+            axes[i][1].set_title(contra_ROIs[i]) # RHS: all contra- regions
+            
+            # plot ipsilesional (feature, motor score) pair for all ROIs
+            x = ipsilesional.iloc[i,:]  # store current region DTI measures 
+            x = x[1:len(ipsilesional.iloc[i,:])]  # remove region name 
+            axes[i][0].scatter(x, list_motor_scores)  # plot each pair
+            
+            # plot contralesional (feature, motor score) pair for all ROIs
+            x = contralesional.iloc[i,:]  # store current region DTI measures 
+            x = x[1:len(contralesional.iloc[i,:])]  # remove region name 
+            axes[i][1].scatter(x, list_motor_scores)  # plot each pair
+            
+        plt.show()
+        
+        return 0 
 
 
     
