@@ -7,14 +7,12 @@ Created on Sat Apr  3 17:38:56 2021
 """
 
 import dtiFunctions as dti
-import pandas as pd 
 
 if __name__ == "__main__":
     # load list of pt IDs, initial UEFM score, and change in UEFM score
     pt_IDs, FM_pre, FM_delta = dti.data_initialization.load_pt_data()
     # load  pre-, post-therapy hemispheric ROI data for FA or MD (user choice)
     pre, post = dti.data_initialization.load_hemispheric_data()
-    
 
     # extract list of ROIs
     ROIs = dti.preprocessing.extract_ROIs(pre)
@@ -27,33 +25,32 @@ if __name__ == "__main__":
     pre = dti.preprocessing.reconstruct_df(pre, pt_IDs, ROIs)
     post = dti.preprocessing.reconstruct_df(post, pt_IDs, ROIs)
     # calculate change in FA for hemisphere ROIs
-    delta = dti.feature_analysis.calculate_feature_change(pre, post, 
-                                                                  pt_IDs)
+    delta = dti.feature_analysis.calculate_feature_change(pre, post, pt_IDs)
     
-    # calculate correlation (pretherapy FA, init FM) for hemispheres
+    # calculate correlation (pretherapy, init FM) for hemispheres
     corr_pre_feature_pre_FM = dti.feature_analysis.correlate_features(
         pre, FM_pre, ROIs)
-    # calculate correlation (pretherapy FA, delta FM) for hemsipheres
+    # calculate correlation (pretherapy, delta FM) for hemsipheres
     corr_pre_feature_delta_FM = dti.feature_analysis.correlate_features(
         pre, FM_delta, ROIs)
-    # calculate correlation (delta FA, delta FM) for hemispheres
+    # calculate correlation (delta, delta FM) for hemispheres
     corr_delta_feature_delta_FM = dti.feature_analysis.correlate_features(
         delta, FM_delta, ROIs)
     
-    # check (pretherapy FA, init FM) correlations for significance 
+    # check (pretherapy, init FM) correlations for significance 
     sig_corr_pre_feature_pre_FM = dti.feature_analysis.check_significance(
         corr_pre_feature_pre_FM)
-    # check (pretherapy FA, delta FM) correlations for significance 
+    # check (pretherapy, delta FM) correlations for significance 
     sig_corr_pre_feature_delta_FM = dti.feature_analysis.check_significance(
         corr_pre_feature_delta_FM)
-    # check (delta FA, delta FM) correlations for significance 
+    # check (delta, delta FM) correlations for significance 
     sig_corr_delta_feature_delta_FM = dti.feature_analysis.check_significance(
         corr_delta_feature_delta_FM)
     
-    # plot (pretherapy FA, init FM) for hemispheres
+    # plot (pretherapy, init FM) for hemispheres
     dti.plot_features.plot_hemisphere_features(pre, FM_pre)
-    # plot (pretherapy FA, delta FM) for hemispheres
+    # plot (pretherapy, delta FM) for hemispheres
     dti.plot_features.plot_hemisphere_features(pre, FM_delta)
-    # plot (delta FA, delta FM) for hemisphers
+    # plot (delta, delta FM) for hemisphers
     dti.plot_features.plot_hemisphere_features(delta, FM_delta)
         
